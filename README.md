@@ -1,0 +1,1 @@
+This is a Rust implementation of the Universal Machine from ICFP 2006. I thank jgrillo for his Rust implementation (UM-32) which helped me figure out some sticking points.
