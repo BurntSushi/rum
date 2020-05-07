@@ -4,7 +4,6 @@ use std::io::prelude::*;
 use std::io::{stdin, stdout};
 use std::process;
 
-use crate::bitpack;
 use crate::memory;
 
 pub fn run(program: Vec<u32>) -> () {
@@ -86,7 +85,6 @@ pub fn run(program: Vec<u32>) -> () {
             Opcode::LoadValue => {
                 r[instr.ra] = instr.value;
             }
-            Opcode::Err => panic!("Illegal instruction!"),
         }
     }
 }
@@ -107,7 +105,6 @@ enum Opcode {
     Input,
     LoadProgram,
     LoadValue,
-    Err, // opcode cannot be parsed (14 or 15)
 }
 
 pub fn boot(filename: &str) -> Vec<u32> {
@@ -138,10 +135,8 @@ pub fn boot(filename: &str) -> Vec<u32> {
 
 // functions for instruction parsing.
 
-fn parse_opcode(instruction: u32) -> Opcode {
-    let opcode = bitpack::getu(instruction as u64, 4, 28);
-
-    match opcode {
+fn parse_opcode(instruction: u32) -> Option<Opcode> {
+    Some(match (instruction >> 28) & 0b1111 {
         0 => Opcode::CMov,
         1 => Opcode::Load,
         2 => Opcode::Store,
@@ -156,8 +151,8 @@ fn parse_opcode(instruction: u32) -> Opcode {
         11 => Opcode::Input,
         12 => Opcode::LoadProgram,
         13 => Opcode::LoadValue,
-        _ => Opcode::Err,
-    }
+        _ => return None,
+    })
 }
 
 #[derive(Debug)]
@@ -171,10 +166,9 @@ struct Instruction {
 
 impl Instruction {
     fn decode(instruction: u32) -> Option<Instruction> {
-        let opcode = parse_opcode(instruction);
+        let opcode = parse_opcode(instruction)?;
         let mut inst = Instruction { opcode, ra: 0, rb: 0, rc: 0, value: 0 };
         match inst.opcode {
-            Opcode::Err => return None,
             Opcode::LoadValue => {
                 inst.ra = ((instruction >> 25) & 0x7) as usize;
                 inst.value = ((instruction << 7) >> 7) as u32;
