@@ -43,18 +43,14 @@ impl Memory {
     }
 
     // supply contents of the memory at the given address if
-    // initialized, None otherwise.
-    #[inline]
-    pub fn load(&self, seg_id: usize, address: usize) -> Option<u32> {
-        match self.heap.get(seg_id) {
-            Some(segment) => Some(segment[address]),
-            None => panic!("Segment unmapped!"),
-        }
+    // initialized, panics otherwise.
+    pub fn load(&self, seg_id: usize, address: usize) -> u32 {
+        self.heap[seg_id][address]
     }
 
     // get the instruction word corresponding to the given program counter
+    // if it doesn't exist, then this panics
     // This may have high overhead...
-    #[inline]
     pub fn get_instruction(&self, pc: usize) -> u32 {
         match self.heap.get(PROGRAM_ADDRESS) {
             Some(program) => program[pc],
@@ -63,7 +59,6 @@ impl Memory {
     }
 
     // write a value into the given address of the given segment.
-    #[inline]
     pub fn store(&mut self, seg_id: usize, address: usize, value: u32) {
         let memory =
             self.heap.get_mut(seg_id).expect("Memory was unallocated");
