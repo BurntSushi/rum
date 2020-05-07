@@ -17,16 +17,17 @@ impl Memory {
     // allocate and initalize (as all 0s) a memory segment.
     // returns the segment ID
     pub fn allocate(&mut self, size: usize) -> usize {
-        let space = vec![0; size];
         // can we reuse a previously unmapped segment id?
-        if self.pool.len() == 0 {
-            self.heap.push(space);
-            self.heap.len() - 1
-        } else {
-            let address = self.pool.pop().expect("No segment ID available");
-            assert!(address < self.heap.len(), "invalid address in pool");
-            self.heap[address] = space;
-            address
+        match self.pool.pop() {
+            None => {
+                self.heap.push(vec![0; size]);
+                self.heap.len() - 1
+            }
+            Some(address) => {
+                assert!(address < self.heap.len(), "invalid address in pool");
+                self.heap[address].resize(size, 0);
+                address
+            }
         }
     }
 
@@ -38,7 +39,7 @@ impl Memory {
             address,
         );
         self.pool.push(address);
-        self.heap[address] = vec![];
+        self.heap[address].clear();
     }
 
     // supply contents of the memory at the given address if
