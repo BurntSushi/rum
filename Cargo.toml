@@ -9,5 +9,6 @@ edition = "2018"
 [dependencies]
 byteorder = "1.0.*"
 
- [profile.release]
- lto = true
+[profile.release]
+debug = true
+lto = true
