@@ -199,11 +199,18 @@ impl std::ops::Index<usize> for Registers {
 
     fn index(&self, i: usize) -> &u32 {
         &self.0[i]
+        // Actually does not seem to improve midmark.
+        // This would probably be unsound anyway without verifying that
+        // every index is correct. In practice, Instruction.{ra,rb,rc} is
+        // always in the range [0, 8), so it's OK for this program.
+        // unsafe { self.0.get_unchecked(i) }
     }
 }
 
 impl std::ops::IndexMut<usize> for Registers {
     fn index_mut(&mut self, i: usize) -> &mut u32 {
         &mut self.0[i]
+        // Actually does not seem to improve midmark.
+        // unsafe { self.0.get_unchecked_mut(i) }
     }
 }
