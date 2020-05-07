@@ -1,8 +1,7 @@
-use byteorder::{BigEndian, ReadBytesExt};
 use std::convert::TryInto;
 use std::fs::File;
 use std::io::prelude::*;
-use std::io::{stdin, stdout, Cursor};
+use std::io::{stdin, stdout};
 use std::process;
 
 use crate::bitpack;
@@ -126,8 +125,7 @@ pub fn boot(filename: &str) -> Vec<u32> {
             for i in 0..contents.len() / 4 {
                 let idx = i * 4;
                 let buf = &contents[idx..idx + 4];
-                let mut rdr = Cursor::new(buf);
-                program.push(rdr.read_u32::<BigEndian>().unwrap());
+                program.push(u32::from_be_bytes(buf.try_into().unwrap()));
             }
 
             program
